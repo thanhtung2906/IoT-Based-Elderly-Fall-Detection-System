@@ -1,4 +1,4 @@
-# IoT-Based-Elderly-Fall-Detection-System
+# IoT-Based Elderly Fall Detection System
 
 ## 📌 Project Overview
 The **IoT-Based Elderly Fall Detection System** is an end-to-end wearable solution designed to monitor the movements of elderly individuals and detect fall events in real-time. 
@@ -9,7 +9,7 @@ By combining edge hardware (ESP32 & MPU6050) with machine learning (Random Fores
 * **Hardware:** ESP32 Microcontroller, MPU6050 (Accelerometer & Gyroscope).
 * **Embedded Software:** C++ / Arduino IDE.
 * **Connectivity:** MQTT Protocol (Local Mosquitto Broker), HTTP (Web Server for data collection), TCP/IP.
-* **Machine Learning:** Python, Scikit-learn (Random Forest, Logistic Regression).
+* **Machine Learning:** Python (Jupyter Notebook), Scikit-learn, Joblib, Pandas, Numpy.
 * **Data Flow & Automation:** Node-RED (for event routing, Firebase storage, and SMTP email alerts).
 
 ## ⚙️ System Architecture
@@ -24,7 +24,7 @@ The project operates in two main phases:
 ### 2. Real-Time Deployment & Inference
 * **Edge Node:** The wearable ESP32 acts as an MQTT Publisher, continuously streaming real-time motion data.
 * **Message Broker:** A local Mosquitto server routes the sensor data streams.
-* **Inference Engine:** A Python script subscribes to the MQTT topics, feeds the live data into the trained ML model, and predicts the user's action.
+* **Inference Engine:** A Jupyter Notebook script subscribes to the MQTT topics, buffers the data stream, feeds it into the pre-trained ML model (loaded via Joblib), and predicts the user's action.
 * **Event Handling:** Node-RED receives the prediction outputs. It logs the data to Firebase for future analysis and routes the events. If a "Fall" is detected, it instantly triggers an SMTP protocol alert to the guardian's email.
 
 ## 🔌 Hardware Setup (Wiring)
@@ -52,19 +52,22 @@ Ensure you have Mosquitto installed on your local machine. Start the service. It
 4. Compile and flash the code to the ESP32.
 
 ### Step 3: Run the Machine Learning Inference
-Ensure you have Python installed. Since there is no `requirements.txt` yet, manually install the required standard libraries:
+The inference engine is built within a Jupyter Notebook. First, install the required third-party libraries (built-in libraries like `json`, `os`, `time`, `datetime`, `collections`, and `threading` are already included in standard Python):
+
 ```bash
-pip install paho-mqtt scikit-learn pandas numpy
+pip install paho-mqtt numpy pandas joblib jupyter
 ```
-Run the prediction script to start listening to MQTT data and making real-time classifications:
+
+Next, launch Jupyter Notebook from your terminal:
 ```bash
-python inference.py
+jupyter notebook
 ```
+Open the `real_time_inference.ipynb` file in your browser or IDE (like VS Code) and **Run All Cells**. The script will load the saved model, connect to the MQTT broker, and start classifying movements in real-time.
 
 ### Step 4: Set up Node-RED Pipeline
 1. Open your local Node-RED dashboard (usually `http://localhost:1880`).
 2. Manually create a flow with the following nodes:
-   * **MQTT In node:** Subscribe to the topic where `inference.py` publishes the final predictions.
+   * **MQTT In node:** Subscribe to the topic where the inference notebook publishes the final predictions.
    * **Switch node:** Route the flow based on the payload (e.g., if payload == "Fall").
    * **Firebase out node:** Configure your Firebase credentials to log the events.
    * **Email out node:** Configure SMTP settings to send alert emails to the guardian.
